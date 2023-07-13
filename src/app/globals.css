@@ -16,12 +16,20 @@
   }
 }
 
+html,
+body,
+#__next {
+  height: 100%;
+  width: 100%;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
+  background-color: #24283b;
+  /* background: linear-gradient(
       to bottom,
       transparent,
       rgb(var(--background-end-rgb))
     )
-    rgb(var(--background-start-rgb));
+    rgb(var(--background-start-rgb)); */
 }
