@@ -33,3 +33,11 @@ body {
     )
     rgb(var(--background-start-rgb)); */
 }
+
+.arrow {
+  border: solid;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+  margin-bottom: 2px;
+}
