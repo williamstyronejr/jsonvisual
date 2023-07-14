@@ -7,33 +7,87 @@ import { tokyoNightStorm } from "@uiw/codemirror-theme-tokyo-night-storm";
 
 const JSONError = () => <div>Json is not valid</div>;
 
-const JsonItem = ({ value, title }: { value: any; title: string }) => {
+const JsonValueItem = ({ value, title }: { value: any; title: string }) => {
   return (
-    <div>
-      <div className="flex flex-row flex-nowrap w-full px-4 py-2 bg-white ">
-        <button
-          className="bg-slate-500 text-white px-2 mr-2"
-          type="button"
-          onClick={() => {}}
-        >
-          <span className="block rotate-90">&gt;</span>
-        </button>
+    <div className="my-1">
+      <div className="flex flex-row flex-nowrap w-full px-4 py-2 items-center rounded-lg bg-slate-50">
+        <div className="mr-2">{typeof value}</div>
 
-        <div className="grow text-black">{title}</div>
+        <div>{title}</div>
+
+        <div className="grow text-slate-500 overflow-x-hidden">{value}</div>
 
         <button
           className="transition-colors text-xl text-slate-300 hover:text-slate-600"
+          type="button"
           onClick={() => {}}
         >
           X
         </button>
       </div>
+    </div>
+  );
+};
 
-      <div className="">
-        <button type="button" className="" onClick={() => {}}>
-          + ADD
-        </button>
-      </div>
+const JsonItem = ({
+  value,
+  title,
+  level = 0,
+}: {
+  value: any;
+  title: string;
+  level: number;
+}) => {
+  const [collasped, setCollasped] = useState(false);
+  return (
+    <div style={{ transform: `translateX(${level * 20}px)` }}>
+      {typeof value === "object" && !Array.isArray(value) ? (
+        <div className="relative">
+          <div className="flex flex-row flex-nowrap w-full px-4 py-2 my-2 rounded-lg items-center bg-white ">
+            <button
+              className="bg-slate-400 rounded-md h-6 text-white px-2 mr-2"
+              type="button"
+              onClick={() => {
+                setCollasped((old) => !old);
+              }}
+            >
+              <span
+                className={`block ${
+                  collasped ? "-rotate-45" : "rotate-45"
+                } arrow`}
+              />
+            </button>
+
+            <div className="grow text-black">{title}</div>
+
+            <button
+              className="transition-colors text-xl text-slate-300 hover:text-slate-600"
+              onClick={() => {}}
+            >
+              X
+            </button>
+          </div>
+
+          <div className={`${collasped ? "hidden" : "block"}`}>
+            {Object.keys(value).map((key) => (
+              <JsonItem
+                key={key}
+                value={value[key]}
+                title={key}
+                level={level + 1}
+              />
+            ))}
+          </div>
+
+          <div style={{ transform: `translateX(${(level + 1) * 20}px)` }}>
+            <button type="button" className="text-slate-500" onClick={() => {}}>
+              <span className="text-xl">+</span> ADD
+            </button>
+          </div>
+        </div>
+      ) : (
+        <JsonValueItem value={value} title={title} />
+      )}
     </div>
   );
 };
@@ -41,11 +95,10 @@ const JsonItem = ({ value, title }: { value: any; title: string }) => {
 const JsonRoot = ({ jsonData }: { jsonData: Record<string, unknown> }) => {
   const keys = Object.keys(jsonData);
 
-  console.log(keys);
   return (
-    <div className="text-black">
+    <div className="grow text-black overflow-y-auto">
       {keys.map((key) => (
-        <JsonItem key={key} title={key} value={jsonData[key]} />
+        <JsonItem key={key} title={key} value={jsonData[key]} level={0} />
       ))}
     </div>
   );
@@ -82,8 +135,8 @@ export default function Home() {
         />
       </div>
 
-      <div className="w-1/2 grow-0 shrink-0 rounded-tl-3xl bg-[#eceaf0] py-10">
-        <h2 className="px-4 font-bold">Visual Editor</h2>
+      <div className="flex flex-col flex-nowrap w-1/2 grow-0 shrink-0 rounded-tl-3xl bg-[#eceaf0] pt-5">
+        <h2 className="shrink-0 px-4 font-bold my-2">Visual Editor</h2>
 
         {jsonData === null ? <JSONError /> : <JsonRoot jsonData={jsonData} />}
       </div>
