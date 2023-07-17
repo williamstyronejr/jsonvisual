@@ -39,7 +39,7 @@ const DropDown = ({
             <div
               className={`${
                 active ? "flex" : "hidden"
-              } flex-col flex-nowrap absolute w-full shadow-md z-10 origin-[top_center] bg-slate-100`}
+              } flex-col flex-nowrap absolute w-full shadow-lg rounded-xl z-20 origin-[top_center] bg-slate-100`}
             >
               {options.map((option) => (
                 <>

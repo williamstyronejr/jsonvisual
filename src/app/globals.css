@@ -41,3 +41,19 @@ body {
   padding: 3px;
   margin-bottom: 2px;
 }
+
+:root {
+  --borderWidth: 4px;
+  --height: 16px;
+  --width: 8px;
+  --borderColor: #ffffff;
+}
+
+.check {
+  display: inline-block;
+  transform: rotate(45deg);
+  height: var(--height);
+  width: var(--width);
+  border-bottom: var(--borderWidth) solid var(--borderColor);
+  border-right: var(--borderWidth) solid var(--borderColor);
+}
