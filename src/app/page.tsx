@@ -527,25 +527,31 @@ export default function MainPage() {
 
   return (
     <main className="flex flex-row flex-nowrap space-around w-full h-full">
-      <div className="w-1/2 grow-0 shrink-0 overflow-y-auto">
-        <ReactCodeMirror
-          className="h-full"
-          width="100%"
-          height="100%"
-          basicSetup={{
-            allowMultipleSelections: true,
-          }}
-          extensions={[json()]}
-          theme={tokyoNightStorm}
-          value={data}
-          onUpdate={(val) => {
-            if (val.docChanged) setData(val.state.doc.toString());
-          }}
-        />
+      <div className="flex flex-col flex-nowrap w-1/2 grow-0 shrink-0 overflow-y-auto pt-5 pl-6 bg-[#24283b]">
+        <h2 className="shrink-0 px-4 font-bold pt-2 pb-6 text-white text-2xl">
+          JSON Editor
+        </h2>
+
+        <div className="grow h-0">
+          <ReactCodeMirror
+            className="h-full text-lg"
+            width="100%"
+            height="100%"
+            basicSetup={{
+              allowMultipleSelections: true,
+            }}
+            extensions={[json()]}
+            theme={tokyoNightStorm}
+            value={data}
+            onUpdate={(val) => {
+              if (val.docChanged) setData(val.state.doc.toString());
+            }}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col flex-nowrap w-1/2 grow-0 shrink-0 rounded-tl-3xl bg-[#eceaf0] pt-5">
-        <h2 className="shrink-0 px-4 font-bold my-2 text-black">
+      <div className="flex flex-col flex-nowrap w-1/2 grow-0 shrink-0 rounded-tl-3xl bg-[#eceaf0] pt-5 pl-6">
+        <h2 className="shrink-0 px-4 font-bold pt-2 pb-6 text-black text-2xl">
           Visual Editor
         </h2>
 
