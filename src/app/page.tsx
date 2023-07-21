@@ -4,7 +4,13 @@ import { useState } from "react";
 import ReactCodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
 import { tokyoNightStorm } from "@uiw/codemirror-theme-tokyo-night-storm";
-import DropDown from "@/components/DropDown";
+import EditObjectItem from "@/components/EditObjectItem";
+import AddValueItem from "@/components/AddValue";
+import {
+  capitialFirst,
+  deletePropertyPath,
+  addPropertyPath,
+} from "./utils/utils";
 
 const initialData = {
   person: {
@@ -18,145 +24,7 @@ const initialData = {
   },
 };
 
-function capitialFirst(str: string) {
-  return str === ""
-    ? str
-    : `${str.substring(0, 1).toUpperCase()}${str.substring(1)}`;
-}
-
 const JSONError = () => <div className="text-black">Json is not valid</div>;
-
-const AddValueItem = ({
-  onComplete,
-  onCancel,
-  initType,
-  initValue,
-  initName,
-}: {
-  onComplete: (name: string, value: any) => void;
-  onCancel: () => void;
-  initType?: string;
-  initValue?: any;
-  initName?: string;
-}) => {
-  const [type, setType] = useState(initType || "String");
-  const [name, setName] = useState(initName || "");
-  const [value, setValue] = useState<string>(initValue || "");
-
-  return (
-    <div className="flex flex-row flex-nowrap w-full px-4 py-2 my-2 rounded-lg items-center bg-white">
-      <input
-        className="w-0 grow rounded-md bg-slate-200 p-2"
-        type="text"
-        placeholder="Name"
-        value={name}
-        onChange={(evt) => setName(evt.target.value)}
-      />
-
-      <div className="w-0 grow mx-1">
-        <DropDown
-          options={["Object", "String", "Number", "Array", "Boolean"]}
-          value={type}
-          changeValue={setType}
-        />
-      </div>
-
-      <div className="w-0 grow">
-        {type === "String" || type === "Number" || type === "Array" ? (
-          <input
-            className="w-full rounded-md bg-slate-200 p-2"
-            type="text"
-            placeholder="Value"
-            value={value}
-            onChange={(evt) => setValue(evt.target.value)}
-          />
-        ) : null}
-
-        {type === "Boolean" ? (
-          <DropDown
-            options={["true", "false"]}
-            value={value}
-            title="Boolean"
-            changeValue={setValue}
-          />
-        ) : null}
-      </div>
-
-      <button
-        type="button"
-        className="transition-colors shrink-0 py-2 px-5 ml-1 rounded-md bg-[#387afc] hover:bg-[#215bcd]"
-        onClick={() => {
-          let actualVal: any = value;
-          switch (type) {
-            case "Number":
-              actualVal = parseFloat(value);
-              break;
-            case "Array":
-              actualVal = actualVal.split(",");
-              break;
-            case "Boolean":
-              actualVal = value === "true";
-              break;
-            case "Object":
-              actualVal = {};
-              break;
-          }
-
-          onComplete(name, actualVal);
-        }}
-      >
-        <div className="check" />
-      </button>
-
-      <button
-        type="button"
-        className="transition-colors shrink-0 pl-2 mx-1 text-xl text-slate-300 hover:text-slate-600"
-        onClick={() => onCancel()}
-      >
-        X
-      </button>
-    </div>
-  );
-};
-
-const AddItem = ({
-  path,
-  level,
-  addValue,
-}: {
-  path: string;
-  level: number;
-  addValue: (path: string, val: any) => void;
-}) => {
-  const [displayAdd, setDisplayAdd] = useState(false);
-
-  return (
-    <div
-      className="mt-4"
-      style={{ transform: `translateX(${(level + 1) * 20}px)` }}
-    >
-      {displayAdd ? (
-        <AddValueItem
-          onCancel={() => setDisplayAdd(false)}
-          onComplete={(title, val) => {
-            addValue(`${path},${title}`, val);
-            setDisplayAdd(false);
-          }}
-        />
-      ) : (
-        <button
-          type="button"
-          className="text-slate-500 px-6"
-          onClick={() => {
-            setDisplayAdd(true);
-          }}
-        >
-          <span className="text-xl">+</span> ADD
-        </button>
-      )}
-    </div>
-  );
-};
 
 const JsonValueItem = ({
   value,
@@ -389,11 +257,32 @@ const JsonValueItem = ({
           </div>
 
           <button
+            className="mr-3"
             onClick={() => {
               setEditing(true);
             }}
           >
-            E
+            <svg
+              className="transition-colors w-6 h-6 stroke-black hover:stroke-slate-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g id="SVGRepo_iconCarrier">
+                <path
+                  d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                ></path>
+                <path
+                  d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                ></path>
+              </g>
+            </svg>
           </button>
 
           <button
@@ -411,43 +300,46 @@ const JsonValueItem = ({
   );
 };
 
-const EditJsonItem = ({
-  initValue,
-  onComplete,
-  onCancel,
+const AddRowItem = ({
+  path,
+  level,
+  addValue,
 }: {
-  initValue: string;
-  onComplete: (name: string) => void;
-  onCancel: () => void;
+  path: string;
+  level: number;
+  addValue: (path: string, val: any) => void;
 }) => {
-  const [name, setValue] = useState(initValue);
+  const [displayAdd, setDisplayAdd] = useState(false);
 
   return (
-    <>
-      <input
-        className="grow p-2"
-        type="text"
-        value={name}
-        onChange={(evt) => setValue(evt.target.value)}
-      />
-
-      <button
-        type="button"
-        className="transition-colors shrink-0 py-2 px-5 ml-1 rounded-md bg-[#387afc] hover:bg-[#215bcd]"
-        onClick={() => {
-          onComplete(name);
-        }}
-      >
-        <div className="check" />
-      </button>
-      <button type="button" className="" onClick={() => onCancel()}>
-        X
-      </button>
-    </>
+    <div
+      className="mt-4"
+      style={{ transform: `translateX(${(level + 1) * 20}px)` }}
+    >
+      {displayAdd ? (
+        <AddValueItem
+          onCancel={() => setDisplayAdd(false)}
+          onComplete={(title, val) => {
+            addValue(`${path},${title}`, val);
+            setDisplayAdd(false);
+          }}
+        />
+      ) : (
+        <button
+          type="button"
+          className="text-slate-500 px-6"
+          onClick={() => {
+            setDisplayAdd(true);
+          }}
+        >
+          <span className="text-xl">+</span> ADD
+        </button>
+      )}
+    </div>
   );
 };
 
-const JsonItem = ({
+const JsonGroup = ({
   value,
   title,
   path,
@@ -466,12 +358,17 @@ const JsonItem = ({
   const [editting, setEditing] = useState(false);
 
   return (
-    <div style={{ transform: `translateX(${level * 40}px)` }}>
+    <div
+      className="relative"
+      style={{
+        left: `${level * 40}px`,
+      }}
+    >
       {typeof value === "object" && !Array.isArray(value) ? (
-        <div className="relative">
-          <div className="flex flex-row flex-nowrap w-full px-4 py-2 my-2 rounded-lg items-center bg-white">
+        <div className="">
+          <div className="flex flex-row flex-nowrap w-full px-4 py-2 my-2 z-10 rounded-lg items-center bg-white">
             {editting ? (
-              <EditJsonItem
+              <EditObjectItem
                 initValue={title}
                 onCancel={() => setEditing(false)}
                 onComplete={(name) => {
@@ -487,15 +384,15 @@ const JsonItem = ({
             ) : (
               <>
                 <button
-                  className="bg-slate-400 rounded-md h-6 text-white px-2 mr-2"
+                  className="bg-slate-300 rounded-md h-6 text-white px-2 mr-2"
                   type="button"
                   onClick={() => {
                     setCollasped((old) => !old);
                   }}
                 >
                   <span
-                    className={`block ${
-                      collasped ? "-rotate-45" : "rotate-45"
+                    className={`block transition-transform ${
+                      collasped ? "-rotate-45 mb-px" : "rotate-45 mb-0.5"
                     } arrow`}
                   />
                 </button>
@@ -503,12 +400,32 @@ const JsonItem = ({
                 <div className="grow text-black">{title}</div>
 
                 <button
-                  className=""
+                  className="mr-3"
                   onClick={() => {
                     setEditing(true);
                   }}
                 >
-                  e
+                  <svg
+                    className="transition-colors w-6 h-6 stroke-black hover:stroke-slate-500"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_iconCarrier">
+                      <path
+                        d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      ></path>
+                      <path
+                        d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      ></path>
+                    </g>
+                  </svg>
                 </button>
 
                 <button
@@ -522,9 +439,10 @@ const JsonItem = ({
               </>
             )}
           </div>
+
           <div className={`${collasped ? "hidden" : "block"}`}>
             {Object.keys(value).map((key) => (
-              <JsonItem
+              <JsonGroup
                 key={key}
                 value={value[key]}
                 title={key}
@@ -537,7 +455,7 @@ const JsonItem = ({
           </div>
 
           <div className={`${collasped ? "hidden" : "block"}`}>
-            <AddItem path={path} level={level} addValue={addValue} />
+            <AddRowItem path={path} level={level} addValue={addValue} />
           </div>
         </div>
       ) : (
@@ -565,9 +483,9 @@ const JsonRoot = ({
   const keys = Object.keys(jsonData);
 
   return (
-    <div className="grow text-black overflow-y-auto px-4">
+    <div className="flex flex-col flex-nowrap grow text-black overflow-y-auto px-4">
       {keys.map((key) => (
-        <JsonItem
+        <JsonGroup
           key={key}
           title={key}
           value={jsonData[key]}
@@ -577,53 +495,13 @@ const JsonRoot = ({
           addValue={addValue}
         />
       ))}
-      <AddItem path="" level={-1} addValue={addValue} />
+
+      <AddRowItem path="" level={-1} addValue={addValue} />
     </div>
   );
 };
 
-function deletePropertyPath(obj: any, paths: string) {
-  let path: any[] = [];
-  if (!obj || !paths) {
-    return;
-  }
-
-  if (typeof paths === "string") {
-    path = paths.split(",");
-  }
-
-  for (var i = 0; i < path.length - 1; i++) {
-    obj = obj[path[i]];
-
-    if (typeof obj === "undefined") {
-      return;
-    }
-  }
-
-  delete obj[path.pop()];
-}
-
-function addPropertyPath(obj: any, paths: string, value: any) {
-  let path: any[] = [];
-  if (!obj || !paths) {
-    return;
-  }
-
-  if (typeof paths === "string") {
-    path = paths.split(",");
-  }
-
-  console.log({ path, paths, value });
-  if (path[0] === "") return (obj[path[1]] = value);
-
-  for (var i = 0; i < path.length - 1; i++) {
-    obj = obj[path[i]];
-  }
-
-  obj[path[path.length - 1]] = value;
-}
-
-export default function Home() {
+export default function MainPage() {
   const [data, setData] = useState(JSON.stringify(initialData, null, 2));
   let jsonData: Record<string, unknown> | null = null;
 
@@ -646,7 +524,7 @@ export default function Home() {
   } catch (err) {
     //
   }
-  // console.log(jsonData);
+
   return (
     <main className="flex flex-row flex-nowrap space-around w-full h-full">
       <div className="w-1/2 grow-0 shrink-0 overflow-y-auto">
